@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'restapp',
     'rest_framework',
+    'cbvapi',
     
 ]
 

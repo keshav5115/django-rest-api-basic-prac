@@ -1,44 +1,46 @@
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view,APIView
-from restapp.api.serilizers import movieserial
-from restapp.models import Movie
-@api_view(['GET','POST'])
-def movielist(request):
-    movie=Movie.objects.all()
-    serilizer=movieserial(movie,many=True)
-    if request.method =='POST':
-        serilizer=movieserial(data=request.data)
+from rest_framework.decorators import APIView
+from cbvapi.api.serilizers import MovieSerial
+from cbvapi.models import Movie
+
+class MovieListAV(APIView):
+
+    def get(self,request):
+        movie=Movie.objects.all()
+        serilizer=MovieSerial(movie,many=True)
+        return Response(serilizer.data)
+
+    def post(self,request):
+        serilizer=MovieSerial(data=request.data)
         if serilizer.is_valid():
             serilizer.save()
             return Response(serilizer.data)
         else:
             return Response(serilizer.errors)
-    return Response(serilizer.data)
+    
 
+class MovieDetailAV(APIView):
 
-@api_view(['GET','PUT','DELETE'])
-def movieone(request,pk):
-    if request.method =='GET':
+    def get(self,request,pk):
         try:
             movie=Movie.objects.get(id=pk)
         except Movie.DoesNotExist :
             content='page not existed'
             return Response(content,status.HTTP_404_NOT_FOUND)
-        serilizer=movieserial(movie)
+        serilizer=MovieSerial(movie)
         return Response(serilizer.data)
-    if request.method == 'PUT':
+
+    def put(self,request,pk):
         movie=Movie.objects.get(id=pk)
-        serilizer=movieserial(instance=movie,data=request.data)
+        serilizer=MovieSerial(instance=movie,data=request.data)
         if serilizer.is_valid():
             serilizer.save()
             return Response(serilizer.data)
         else:
             return Response(serilizer.errors,status.HTTP_400_BAD_REQUEST)
 
-    if request.method =='DELETE':
+    def delete(self,request,pk):
         movie=Movie.objects.get(id=pk).delete()
         content='movie was not there'
         return Response(content,status.HTTP_204_NO_CONTENT)
-
-
